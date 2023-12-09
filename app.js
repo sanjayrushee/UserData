@@ -57,7 +57,7 @@ app.post("/register", async (request, response) => {
     } else {
       let newuserData = await database.run(adduserdata);
       response.status(200);
-      response.send("User created successfuly");
+      response.send("User created successfully");
     }
   } else {
     response.status(400);
@@ -65,25 +65,26 @@ app.post("/register", async (request, response) => {
   }
 });
 app.post("/login", async (request, response) => {
-  const { userName, password } = request.body;
+  const { username, password } = request.body;
   const userdetails = `
     SELECT *
     FROM
     user
     WHERE
-    username = ${userName};`;
-  const user = await database.get(userdetails);
-  if (user === undefined) {
+    username = '${username}';`;
+  const userdatabase = await database.get(userdetails);
+
+  if (userdatabase === undefined) {
     response.status(400);
     response.send("Invalid user");
   } else {
-    let passwordcheck = await bcrypt.compare(password, database.password);
+    const passwordcheck = await bcrypt.compare(password, userdatabase.password);
     if (passwordcheck === true) {
-      response.status(400);
-      response.send("Invalid password");
-    } else {
       response.status(200);
       response.send("Login success!");
+    } else {
+      response.status(400);
+      response.send("Invalid password");
     }
   }
 });
@@ -102,7 +103,7 @@ app.post("/change-password", async (request, response) => {
     response.status(400);
     response.send("Invalid user");
   } else {
-    const verifypassword = bcrypt.compare(oldPassword, database.password);
+    const verifypassword = await bcrypt.compare(oldPassword, user.password);
     if (verifypassword === true) {
       let lengthOfNewpassword = newPassword.length;
       if (lengthOfNewpassword < 5) {
@@ -118,12 +119,13 @@ app.post("/change-password", async (request, response) => {
                 WHERE
                 username = '${username}';
                 `;
-        response.send("password update");
+        response.send("Password updated");
       }
     } else {
       response.status(400);
-      response.send("Invalid password");
+      response.send("Invalid current password");
     }
   }
 });
+
 module.exports = app;
