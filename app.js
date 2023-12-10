@@ -30,8 +30,6 @@ initializeDbAndServer();
 
 app.post("/register", async (request, response) => {
   const { username, name, password, gender, location } = request.body;
-  let hashedpassword = await bcrypt.hash(password, 10);
-
   let checkTheUsername = `
   SELECT
   *
@@ -42,6 +40,8 @@ app.post("/register", async (request, response) => {
   let userData = await database.get(checkTheUsername);
 
   if (userData === undefined) {
+    let hashedpassword = await bcrypt.hash(password, 10);
+
     let adduserdata = `INSERT INTO
             user (username,name,password,gender,location)
             VALUES (
@@ -119,6 +119,7 @@ app.post("/change-password", async (request, response) => {
                 WHERE
                 username = '${username}';
                 `;
+        await database.run(updatePassword);
         response.send("Password updated");
       }
     } else {
